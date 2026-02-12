@@ -38,3 +38,4 @@ kramdown:
     preview: true
 
 highlighter: rouge
+mathjax: true
