@@ -11,8 +11,8 @@ minimal_mistakes_skin: "default"   # try "air", "dark", "mint" later if you want
 
 author:
   name: "Radu Savancea"
-  bio: "Deep learning & structural biology"
-  location: "Your Location"
+  bio: "Exploring deep learning, scientific AI, and a world with more bits than atoms"
+  location: "Stuttgart"
   avatar: "/assets/images/profile.png"
 
   links:

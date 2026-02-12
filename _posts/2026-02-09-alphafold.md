@@ -2,7 +2,7 @@
 title: "AlphaFold — A Deep Learning Breakthrough in Protein Structure Prediction"
 layout: single
 date: 2026-02-12
-author_profile: false
+author_profile: true
 classes: wide
 math: true
 categories: [AlphaFold]
@@ -123,7 +123,7 @@ CASP (since 1994) benchmarks structure prediction every two years.
 
 # 5. AlphaFold2 — Full Pipeline
 
-![AlphaFold Pipeline](/assets/images/alphafold_pipeline.png)
+![AlphaFold Pipeline]({{ "/assets/images/alphafold_pipeline.png" | relative_url }})
 
 The pipeline consists of:
 
