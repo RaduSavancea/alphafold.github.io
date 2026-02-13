@@ -11,331 +11,190 @@ tags: [Protein Folding, Evoformer, Geometry, MSA, CASP]
 
 # AlphaFold 2 — A Deep Learning Breakthrough
 
-This post follows the structure of my seminar presentation and walks step-by-step from biological foundations to the architecture and results of AlphaFold2 and AlphaFold3.
+## AlphaFold — A Breakthrough in Biomolecular AI
+
+In this blog post, we explore the fundamental concepts behind **protein folding** and the key architectural innovations of **AlphaFold 2** and **AlphaFold 3** — two landmark systems that reshaped computational biology.
+
+AlphaFold represents a pivotal achievement in biological AI, particularly in **3D protein structure prediction**. The work led to Nobel Prize recognition for **Demis Hassabis**, leader of the AlphaFold project, and **John Jumper**, for groundbreaking contributions to computational biology and protein folding prediction.
+
+We will move from the biological foundations to the deep learning architecture that made this breakthrough possible.
 
 ---
 
-# 1. Biomolecular Structure — Proteins
+## Contents
 
-Proteins are large biomolecules composed of one or more amino acid chains.  
-They perform nearly every task in cellular life.
-
-**Key principle:**
-
-> The 3D shape of a protein determines its function.
-
-Each amino acid consists of:
-
-- Alpha carbon $C_\alpha$
-- Amino group (NH₂)
-- Carboxyl group (COOH)
-- Side chain $R$
-
-There are **20 standard amino acids**, each defined by its side chain.
-
-![Amino Acid Structure]({{ "/assets/images/amino_acid.png" | relative_url }})
+1. [Proteins](#proteins)  
+2. [Protein Folding Problem](#protein-folding-problem)  
+3. [Previous Work and Quality Assessments](#previous-work-and-quality-assessments)  
+4. [AlphaFold 2](#alphafold-2)  
+5. [AlphaFold 3](#alphafold-3)  
+6. [Experiments and Results](#experiments-and-results)  
+7. [Concluding Thoughts](#concluding-thoughts)  
 
 ---
 
-# 2. The Protein Folding Problem
+# Proteins
 
-Proteins have four structural levels:
+Proteins are essential biomolecules and macromolecules present in every cell of all living organisms. They are among the most abundant organic molecules in biological systems and perform a vast range of functions necessary for life.
 
-1. **Primary** — amino acid sequence  
-2. **Secondary** — α-helices and β-sheets  
-3. **Tertiary** — full 3D fold  
-4. **Quaternary** — multi-chain complexes  
+The **structure of a protein is directly linked to its function**. Understanding protein structure is therefore fundamental for studying physiological processes such as:
 
-![Protein Structure Levels]({{ "/assets/images/protein_levels.png"|relative_url }})
+- Human health and disease  
+- Enzyme catalysis  
+- Cellular signaling  
+- Immune response  
+- Drug interactions  
 
-Folding transforms a linear sequence into a functional 3D structure.
-
-### Levinthal’s Paradox
-
-If each residue had only a few conformations, the number of possible structures would be astronomical:
-
-$$
-\sim 10^{143}
-$$
-
-Yet proteins fold within milliseconds.
-
-This implies:
-
-> Folding is highly constrained and guided — not random search.
+Insights into protein structure enable the development of therapeutic strategies, including rational drug design and allergy treatment.
 
 ---
 
-# 3. Approximation Methods
+## Amino Acids — The Building Blocks
 
-Two approaches exist:
+Proteins are composed of one or more **chains of amino acids**.
 
-## Experimental Methods
+An amino acid consists of:
 
-- X-ray crystallography  
-- NMR spectroscopy  
-- Cryo-EM  
+- A central carbon atom (**C-α**)  
+- An amino group (NH₂)  
+- A carboxyl group (COOH)  
+- A hydrogen atom  
+- A variable side chain (R-group)
 
-These measure final structures but are expensive and slow.
+<figure style="text-align: center;">
+  <img src="{{ '/assets/images/amino_acid.png' | relative_url }}" alt="Amino Acid Structure" width="500">
+  <figcaption><strong>Figure 1:</strong> General structure of an amino acid showing.</figcaption>
+</figure>
 
-## Computational Methods
+The side chain determines the chemical properties of the amino acid. In nature, there are **20 standard amino acids**, each with a unique side chain and one-letter representation.
 
-Given a sequence:
+When amino acids link together, they form a **peptide bond** through a dehydration synthesis reaction:
 
-$$
-x = (x_1, \dots, x_n)
-$$
+- The carboxyl group (COOH) of one amino acid
+- Bonds with the amino group (NH₂) of another
+- Releases a water molecule
+- Forms a stable peptide linkage
 
-predict coordinates:
+Once incorporated into a chain, an amino acid is referred to as a **residue**.
 
-$$
-f_\theta(x) \in \mathbb{R}^{n \times 3}
-$$
-
-This is the protein structure prediction problem.
-
----
-
-# 4. Quality Assessment
-
-Proteins are typically represented as:
-
-- Point clouds (3D atomic coordinates)
-- Density volumes
-
-A naive loss would be RMSD:
-
-$$
-L(p_1, p_2) = \sum_{i=1}^{n_C} \| p_1^{(i)} - p_2^{(i)} \|_2
-$$
-
-But proteins have no canonical orientation.
-
-Therefore, CASP uses **GDT (Global Distance Test)**:
-
-- Computes percentage of residues within threshold $\lambda$
-- More robust to outliers
-
-CASP (since 1994) benchmarks structure prediction every two years.
+A protein is therefore fundamentally a **sequence of residues**, and this sequence determines its eventual three-dimensional structure.
 
 ---
 
-# 5. AlphaFold2 — Full Pipeline
+# Protein Folding Problem
 
-![AlphaFold Pipeline]({{ "/assets/images/alphafold_pipeline.png" | relative_url }})
+Proteins do not function as linear chains. They fold into complex three-dimensional structures.
 
-The pipeline consists of:
+Protein structure can be categorized into four levels:
 
-1. Sequence input
-2. MSA search
-3. Template search (PDB)
-4. Evoformer
-5. Structure Module
-6. Recycling
+1. **Primary structure** – the amino acid sequence  
+2. **Secondary structure** – local motifs such as α-helices and β-sheets  
+3. **Tertiary structure** – full 3D conformation of a single chain  
+4. **Quaternary structure** – structure formed by multiple interacting chains  
 
-Importantly:
+<figure style="text-align: center;">
+  <img src="{{ '/assets/images/protein_levels.png' | relative_url }}" alt="Protein Structure Levels" width="650">
+  <figcaption><strong>Figure 2:</strong> Hierarchical levels of protein structure — primary, secondary (α-helix and β-sheet), tertiary, and quaternary structure.</figcaption>
+</figure>
 
-> AlphaFold does NOT simulate folding physics.  
-> It learns structural constraints from data.
+Protein folding describes the process by which a linear amino acid chain adopts its functional 3D conformation.
 
----
+Correct folding is essential. Misfolded proteins can become inactive or even toxic and are linked to diseases such as:
 
-# 6. Input Feature Extraction
-
-## Multiple Sequence Alignment (MSA)
-
-The model searches genetic databases (e.g., BFD) to construct an MSA.
-
-Why?
-
-Evolution preserves structure.
-
-If residue $i$ mutates and residue $j$ co-mutates:
-
-$$
-\text{Cov}(i,j) > 0 \Rightarrow \text{spatial proximity}
-$$
-
-This is **coevolution**.
-
-MSA tensor:
-
-$$
-M \in \mathbb{R}^{N_{seq} \times N_{res} \times d}
-$$
+- Alzheimer’s disease  
+- Cancer  
+- Neurodegenerative disorders  
 
 ---
 
-## Pair Representation
+## Levinthal’s Paradox
 
-Residue-pair features:
+The difficulty of the folding problem becomes clear when considering the number of possible conformations.
+
+In 1969, Cyrus Levinthal estimated that the number of possible conformations for a protein could be on the order of:
 
 $$
-P \in \mathbb{R}^{N_{res} \times N_{res} \times d}
+10^{300}
 $$
 
-Computed via outer-product operations over MSA embeddings.
+If a protein tried all possible conformations randomly, folding would take longer than the age of the universe.
 
-These encode potential geometric relationships.
+Yet in reality, proteins fold in milliseconds to seconds.
+
+This contradiction is known as **Levinthal’s Paradox**, and it highlights the need for efficient computational and physical principles guiding the folding process.
+
+Understanding this challenge is central to appreciating why AlphaFold represents such a profound breakthrough.
 
 ---
 
-# 7. Evoformer
+# Previous Work and Quality Assessments
 
-Core innovation.
+The search for protein structures began in the 1950s, marking the dawn of modern structural biology.
 
-Evoformer jointly processes:
+In 1955, Frederick Sanger determined the amino acid sequence of insulin — revealing the primary structure of a protein and earning him the Nobel Prize in Chemistry in 1958.
 
-- MSA representation
-- Pair representation
+Methods for determining protein structures fall into two main categories:
 
-It consists of 48 blocks.
+## 1. Experimental Techniques
 
-## MSA Transformer
+These methods provide direct physical measurements.
 
-- Row attention → residue interactions  
-- Column attention → evolutionary coupling  
+### X-ray Crystallography
+- Proteins are crystallized
+- Exposed to X-rays
+- Diffraction patterns produce electron density maps
+- Highly accurate for final structures
+- Cannot capture folding dynamics
 
-## Pair Transformer
+### Nuclear Magnetic Resonance (NMR)
+- Measures protein structures in solution
+- Can capture dynamics on very small time scales
+- Folding occurs on the order of 50–3000 s⁻¹
 
-Triangle attention:
-
-$$
-P_{ij} \leftarrow \text{Attention}(P_{ik}, P_{kj})
-$$
-
-This enforces geometric consistency:
-
-If $i$ close to $k$  
-and $k$ close to $j$,  
-then $i$ must be constrained relative to $j$.
-
-This approximates triangle inequality constraints.
+Experimental methods are highly accurate but expensive and time-consuming.
 
 ---
 
-# 8. Structure Module
+## 2. Computational Techniques
 
-After Evoformer refinement:
+Computational approaches predict structure directly from amino acid sequences.
 
-Residues are treated as rigid frames:
+They incorporate:
 
-$$
-(R_i, t_i) \in SO(3) \times \mathbb{R}^3
-$$
+- Evolutionary information  
+- Structural priors  
+- Physicochemical constraints  
+- Statistical learning  
 
-Each residue is represented as a triangle defined by backbone atoms (N, Cα, C).
-
-## Invariant Point Attention (IPA)
-
-Attention operates directly in 3D space.
-
-Crucially:
-
-$$
-f(Rx + t) = R f(x) + t
-$$
-
-This guarantees rotation and translation equivariance.
-
-IPA iteratively updates:
-
-$$
-(R_i, t_i)
-$$
-
-Torsion angles determine final atomic coordinates.
+Predicted structures are evaluated against experimentally determined ones.
 
 ---
 
-# 9. Training and Loss
+## Quality Assessment
 
-## Frame Aligned Point Error (FAPE)
+Protein structures are typically represented as:
 
-Instead of global RMSD:
+- A **point cloud** of atomic coordinates  
+- A **3D density volume**  
 
-$$
-\text{FAPE} = \sum_i \| F_i^{-1}(x_j) - F_i^{*-1}(x_j^*) \|
-$$
-
-Advantages:
-
-- Local frame alignment
-- Preserves chirality
-- Stabilizes training
-
-Additional losses:
-
-- Distogram loss
-- Auxiliary torsion angle losses
-
-Training uses gradient descent:
+A common evaluation metric is the **Root Mean Square Error (RMSE)** over C-α atom positions:
 
 $$
-w_{t+1} = w_t - \eta \nabla L(w_t)
+L(p_1, p_2) = \sum_{i=1}^{n_C} \| p_1^{(i)} - p_2^{(i)} \|^2
 $$
 
----
+However, RMSE requires alignment since proteins have no canonical orientation.
 
-# 10. Datasets
+To fairly compare methods, the community established the **Critical Assessment of Structure Prediction (CASP)** in 1994.
 
-AlphaFold2 uses:
+CASP:
+- Held every two years  
+- Tests models on newly solved structures  
+- Uses **Global Distance Test (GDT)** instead of RMSE  
+- Provides a score from 0 to 100  
 
-## Sequence Database
-- BFD (2.2 billion sequences)
+In 2020 and 2022, AlphaFold dramatically outperformed previous approaches, nearly doubling the GDT accuracy of earlier systems.
 
-## Structure Database
-- Protein Data Bank (PDB)
-
-Templates guide prediction but are not required.
-
----
-
-# 11. Results — CASP14
-
-| CASP | Year | Top GDT_TS |
-|------|------|------------|
-| CASP13 | 2018 | 65 |
-| CASP14 | 2020 | **92.4** |
-
-Median RMSD ≈ 1 Å.
-
-Performance tripled over previous methods.
-
-Generalization:
-
-- 3,144 unseen chains
-- Median RMSD = 1.46 Å
-
-AlphaFold2 essentially solved single-chain structure prediction.
+This marked a turning point in computational biology — and set the stage for AlphaFold 2.
 
 ---
-
-# 12. Discussion
-
-### Strengths
-
-- Near experimental accuracy
-- Strong geometric inductive bias
-- End-to-end differentiable
-- Recycling refinement
-
-### Limitations
-
-- Static structures (no dynamics)
-- Struggles with complexes
-- Depends on rich MSA data
-
-These limitations motivated AlphaFold3.
-
----
-
-# Conclusion
-
-AlphaFold2 demonstrates that:
-
-- Evolution encodes geometric information
-- Attention mechanisms can infer structure
-- Geometric deep learning can solve long-standing scientific problems
-
-It represents a milestone in AI for science.
