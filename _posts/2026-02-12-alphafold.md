@@ -52,7 +52,7 @@ Proteins are composed of one or more **chains of amino acids**. Each amino acid 
   <figcaption>
     <strong>Figure 1:</strong> General structure of an amino acid showing the central C-α atom, amino group, carboxyl group, hydrogen atom, and variable side chain.
     <br>
-    <em>Source:</em> Adapted from GeeksforGeeks, <em>Amino Acids: Definition, Structure, Properties, Classification</em> [1].
+    <em>Source:</em> Adapted from GeeksforGeeks, <em>Amino Acids: Definition, Structure, Properties, Classification</em> <sup><a href="#ref1">[1]</a></sup>.
   </figcaption>
 </figure>
 
@@ -75,7 +75,7 @@ Protein structure is commonly described at four hierarchical levels. The primary
   <figcaption>
     <strong>Figure 2:</strong> Hierarchical organization of protein structure — from primary sequence to quaternary assembly.
     <br>
-    <em>Source:</em> Biology4Alevel, <em>Protein Structure</em> [2].
+    <em>Source:</em> Biology4Alevel, <em>Protein Structure</em> <sup><a href="#ref2">[2]</a></sup>.
   </figcaption>
 </figure>
 
@@ -99,7 +99,7 @@ Moreover, protein structures help interpret genetic variation and mutations. Man
 
 <figure style="text-align: center;">
   <img src="{{ '/assets/images/Corona.JPG' | relative_url }}" alt="Predicted protein structure example" width="500">
-  <figcaption><strong>Figure 3:</strong> Example of a predicted protein structure (Q8W3K0 — plant disease resistance protein) from the AlphaFold Protein Structure Database.</figcaption>
+  <figcaption><strong>Figure 3:</strong>  Human coronavirus OC43 spike protein (4,665 residues), heavily glycosylated and bound by neutralizing antibodies.</figcaption>
 </figure>
 
 The ability to computationally predict accurate protein structures at scale fundamentally changes how we approach biology, medicine, and molecular engineering.
@@ -129,7 +129,7 @@ The effort to determine protein structures dates back to the 1950s and marks the
 
 Two major approaches have been developed to determine protein structures: experimental methods and computational methods.
 
-Experimental techniques such as **X-ray crystallography** expose crystallized proteins to X-rays and reconstruct electron density maps from diffraction patterns. A typical X-ray pipeline involves protein crystallization — a particularly challenging step for membrane proteins due to their low solubility — followed by X-ray diffraction and reconstruction of electron density maps. One of the central technical challenges in this process is the *phase problem*, which requires specialized methods to resolve. Even after obtaining an electron density map, reconstructing the final 3D atomic model involves a degree of interpretation; especially at lower resolutions, two experts may produce slightly different structural models from the same data. While highly accurate, this method captures only the final folded structure, requires substantial laboratory effort, and is expensive — often costing on the order of \$100,000–\$1,000,000 per structure [3].
+Experimental techniques such as **X-ray crystallography** expose crystallized proteins to X-rays and reconstruct electron density maps from diffraction patterns. A typical X-ray pipeline involves protein crystallization, a particularly challenging step for membrane proteins due to their low solubility, followed by X-ray diffraction and reconstruction of electron density maps. One of the central technical challenges in this process is the *phase problem*, which requires specialized methods to resolve. Even after obtaining an electron density map, reconstructing the final 3D atomic model involves a degree of interpretation; especially at lower resolutions, two experts may produce slightly different structural models from the same data. While highly accurate, this method captures only the final folded structure, requires substantial laboratory effort, and is expensive — often costing on the order of \$100,000–\$1,000,000 per structure <sup><a href="#ref3">[3]</a></sup>.
 
 
 **Nuclear magnetic resonance (NMR)** spectroscopy measures protein structures in solution and can capture dynamics on very small time scales, which is important because folding and conformational transitions can occur on the order of 50–3000 s⁻¹. However, NMR is generally limited to smaller proteins and can be experimentally demanding.
@@ -167,7 +167,7 @@ AlphaFold 2 fundamentally redefined protein structure prediction by combining ev
 
 At its core lies a crucial biological insight: **evolution contains structural information**.
 
-Many mutations are tolerated without disrupting overall fold, allowing sequence divergence while preserving structural constraints. As a result, protein sequences can diverge substantially across distant species (often by more than 70%), while their three-dimensional structures remain remarkably conserved [3]. In other words:
+Many mutations are tolerated without disrupting overall fold, allowing sequence divergence while preserving structural constraints. As a result, protein sequences can diverge substantially across distant species (often by more than 70%), while their three-dimensional structures remain remarkably conserved <sup><a href="#ref3">[3]</a></sup>. In other words:
 
 > Protein structure is far more conserved than protein sequence.
 
@@ -212,7 +212,7 @@ This alignment encodes powerful evolutionary signals:
 - **Conservation** of a column often implies structural or functional importance (e.g., catalytic residues, ligand binding sites).
 - **Co-evolution** between two columns suggests structural coupling — if residue $i$ mutates and residue $j$ consistently mutates in response, the two residues are likely interacting in 3D space.
 
-Intuitively, if two residues participate in a bonding mechanism, mutating one without compensating changes would destabilize the protein. Therefore, correlated mutations preserve structural integrity [4].
+Intuitively, if two residues participate in a bonding mechanism, mutating one without compensating changes would destabilize the protein. Therefore, correlated mutations preserve structural integrity <sup><a href="#ref4">[4]</a></sup>.
 
 The alignment is embedded into a tensor:
 
@@ -222,9 +222,20 @@ $$
 
 where:
 
-- $N_{\text{seq}}$ is the number of aligned sequences  
-- $N$ is the number of residues  
-- $c_m$ is the embedding dimension  
+where
+
+$$
+N_{\text{seq}} \text{ is the number of aligned sequences,}
+$$
+
+$$
+N \text{ is the number of residues,}
+$$
+
+$$
+c_m \text{ is the embedding dimension.}
+$$
+
 
 This tensor does not explicitly encode distances. Instead, it encodes **evolutionary constraints**, from which geometric structure can be inferred.
 
@@ -754,14 +765,34 @@ If AlphaFold 2 acts as a geometric constraint solver, AlphaFold 3 behaves as a l
 
 ## References
 
-[1] GeeksforGeeks, *Amino Acids: Definition, Structure, Properties, Classification*.  
+## References
+
+<div id="ref1">
+
+**[1]** GeeksforGeeks. (n.d.). *Amino Acids: Definition, Structure, Properties, Classification*.  
+<a href="https://www.geeksforgeeks.org/amino-acids-definition-structure-properties-classification/" target="_blank">
 https://www.geeksforgeeks.org/amino-acids-definition-structure-properties-classification/
+</a>
 
-[2] Biology4Alevel, *Protein Structure*.  
+</div>
+
+<div id="ref2">
+
+**[2]** Biology4Alevel. (2014). *Protein Structure*.  
+<a href="http://biology4alevel.blogspot.com/2014/" target="_blank">
 http://biology4alevel.blogspot.com/2014/
+</a>
 
-[3] Boris Burkov, *Why AlphaFold 2 Matters*.  
+</div>
+
+<div id="ref3">
+
+**[3]** Burkov, B. (2021). *Why AlphaFold 2 Matters*.  
 https://borisburkov.net/2021-12-25-1/
 
-[4] Simon Kohl, *Highly Accurate Protein Structure Prediction with AlphaFold*, Heidelberg.ai, May 05 2022.  
-https://heidelberg.ai/2022/05/05/alpha-fold.html :contentReference[oaicite:1]{index=1}
+</div>
+
+<div id="ref4">
+
+**[4]** Kohl, S. (2022). *Highly Accurate Protein Structure Prediction with AlphaFold*. Heidelberg.ai.  
+https://heidelberg.ai/2022/05/05/alpha-fold.html
