@@ -282,19 +282,6 @@ This means attention is applied along one axis at a time:
 - Along residues (row-wise attention)  
 - Along sequences (column-wise attention)  
 
-This factorization reduces computational complexity from
-
-$$
-\mathcal{O}((N_{\text{seq}} \cdot N)^2)
-$$
-
-to
-
-$$
-\mathcal{O}(N_{\text{seq}} \cdot N^2 + N \cdot N_{\text{seq}}^2)
-$$
-
-making large MSAs tractable while preserving expressive power.
 
 ---
 
@@ -363,18 +350,18 @@ $$
 =
 \mathrm{softmax}_k
 \left(
-\frac{Q_{ik} \cdot K_{jk}}{\sqrt{c}}
+\frac{Q_{ij} \cdot K_{ik}}{\sqrt{d}}
 +
 b_{jk}
 \right)
 $$
-
 The updated pair embedding becomes:
 
 $$
 z'_{ij}
 =
-\sum_k \alpha_{ijk} V_{jk}
+\sum_k
+\alpha_{ijk} V_{ik}
 $$
 
 Residue *k* therefore acts as a mediator between *i* and *j*. If both (*i*, *k*) and (*j*, *k*) suggest compatibility, this influences the updated belief about (*i*, *j*).
@@ -399,6 +386,10 @@ In combination, axial attention extracts evolutionary constraints, and triangle 
 
 After the Evoformer produces a consistent relational representation, AlphaFold translates this abstract structure into explicit 3D coordinates.
 
+The Structure Module performs this translation. It treats the protein not as a continuous chain at first, but as a collection of independent rigid units, also denoted in the paper as a **residue gas**.
+
+Each amino acid is modeled as a rigid triangle defined by its backbone atoms (N, Cα, C). Importantly, these residues are initially *disconnected* and placed at the origin (idea of cutting the peptide chain). The polymer chain constraint is temporarily ignored. The network must therefore learn how to assemble this unordered collection of rigid residues into a coherent three-dimensional structure
+
 The Structure Module is designed to be **SE(3)-equivariant**, meaning:
 
 - Rotating or translating the entire protein does not change internal decisions  
@@ -414,7 +405,7 @@ The Structure Module is designed to be **SE(3)-equivariant**, meaning:
 
 ### Rigid-Body Representation of Residues
 
-Each residue \( i \) is assigned a rigid transformation:
+Each residue *i* is assigned a rigid transformation:
 
 $$
 T_i = (R_i, t_i)
@@ -433,43 +424,54 @@ $$
 R_i = I, \quad t_i = 0
 $$
 
-The network must learn to position and orient every residue in 3D space.
+All residues therefore begin as overlapping triangles at the origin, also known as the "gas" configuration, or "Black hole initialization". The task of the structure module is to progressively rotate and translate these rigid units into their correct spatial arrangement
 
 ---
 
 ### Invariant Point Attention (IPA)
 
-Invariant Point Attention augments standard attention with geometric awareness.
+The central mechanism enabling geometric reasoning is the Invariant Point Attention (IPA).
 
-Each residue predicts learned local points:
+IPA augments standard feature-based attention with geometric distance invariance. Each residue predicts a set of learned local reference points:
 
 $$
 p_i^{(m)} \in \mathbb{R}^3
 $$
 
-These are transformed into global coordinates:
+These points are defined in the local coordinate frame of the residue. They are mapped into global coordinates via the current rigid transformation:
 
 $$
 \hat{p}_i^{(m)} = R_i p_i^{(m)} + t_i
 $$
 
-The attention score between residues includes both feature similarity and geometric proximity:
+Attention between residues depends not only on feature similarity but also on geometric proximity:
 
 $$
-\mathrm{score}(i,j) =
+\mathrm{score}(i,j)
+=
 Q_i \cdot K_j
 -
 \sum_m
-\|\hat{p}_i^{(m)} - \hat{p}_j^{(m)}\|^2
+\| \hat{p}_i^{(m)} - \hat{p}_j^{(m)} \|^2
 $$
 
-Because Euclidean distance is invariant under rotation and translation, attention decisions depend only on relative geometry, ensuring SE(3) equivariance.
+The crucial term is the squared Euclidean distance between transformed points.
+
+Because Euclidean distance is invariant under global rotation and translation, this scoring function depends only on relative geometry, not absolute orientation in space. This ensures overall SE(3) equivariance.
+
+If the entire protein were rotated or translated by a rigid motion:
+
+- Each frame would transform accordingly  
+- Distances between points would remain unchanged  
+- Attention weights would remain identical  
+
+Intuitively, residues attend more strongly to nearby residues in 3D space. The closer two residues are predicted to be, the stronger their geometric interaction.
 
 ---
 
 ### Frame Updates
 
-The network predicts incremental rigid-body transformations:
+After attention, the network predicts incremental rigid-body updates:
 
 $$
 \Delta R_i, \quad \Delta t_i
@@ -485,30 +487,32 @@ $$
 t_i \leftarrow \Delta R_i t_i + \Delta t_i
 $$
 
-This iterative refinement (typically ~8 steps) resembles a learned geometric optimization procedure:
+These updates are applied iteratively (typically around 8 refinement steps). Early iterations establish coarse global layout, while later iterations refine local geometry.
 
-- Early iterations establish coarse layout  
-- Later iterations refine spatial precision  
+This process resembles a learned geometric optimization procedure operating directly in SE(3).
+
 
 ---
 
-### Backbone and Side-Chain Construction
+### Reintroducing the Chain: Backbone and Side-Chain Construction
 
 Once backbone frames are refined, atomic coordinates are placed deterministically.
 
-For atom \( a \) in residue \( i \):
+For atom *a* in residue *i*:
 
 $$
-x_{i,a} =
+\begin{aligned}
+x_{i,a}
+&=
 R_i \hat{x}_{i,a}(\chi_i)
 +
-t_i
-$$
-
-where:
-
-- \( \hat{x}_{i,a}(\chi_i) \) are canonical local coordinates  
-- \( \chi_i \) are predicted torsion angles  
+t_i \\[8pt]
+\hat{x}_{i,a}(\chi_i)
+&:\ \text{canonical local coordinates of atom } a \text{ in residue } i \\[4pt]
+\chi_i
+&:\ \text{predicted torsion angles of residue } i
+\end{aligned}
+$$ 
 
 Torsion angles are predicted via sine and cosine representations:
 
@@ -531,8 +535,6 @@ AlphaFold 2 separates protein folding into two conceptual phases:
 3. **Refining geometry through SE(3)-equivariant updates**
 
 This separation between high-dimensional relational reasoning and geometric instantiation is one of the central architectural innovations that enabled AlphaFold 2 to achieve near-experimental accuracy in CASP.
-
-It marked the moment when deep learning transformed structural biology from a decades-long grand challenge into a tractable computational problem.
 
 
 # AlphaFold 3 — From Folding to Generative Molecular Modeling
@@ -558,7 +560,7 @@ This transition required a conceptual change: from geometric constraint solving 
 
 AlphaFold 2 operated primarily at the residue level. AlphaFold 3 instead introduces a unified token space where every molecular component is represented consistently.
 
-If a system contains \( N \) total molecular units (residues, atoms, bases, ions), the model constructs:
+If a system contains ***N*** total molecular units (residues, atoms, bases, ions), the model constructs:
 
 $$
 \text{Single} \in \mathbb{R}^{N \times c}
@@ -576,7 +578,7 @@ Unlike AlphaFold 2, no assumption is made that tokens correspond only to amino a
 
 # The Pairformer
 
-The Evoformer trunk of AlphaFold 2 is replaced by the **Pairformer** in AlphaFold 3.  
+The Evoformer trunk of AlphaFold 2 is replaced by the **Pairformer** in AlphaFold 3. They have a similar structure, but some changes were made to make it work for different types of molecular structure.  
 
 The Pairformer jointly updates token embeddings and pair embeddings through attention and message passing.
 
@@ -623,7 +625,7 @@ Relational consistency is instead learned implicitly through the diffusion objec
 
 The most significant architectural innovation of AlphaFold 3 is the introduction of diffusion modeling for structure generation.
 
-Rather than refining rigid-body frames, the model directly generates atomic coordinates.
+Rather than refining rigid-body frames like in the Structure module of AF2, the model directly generates atomic coordinates.
 
 ---
 
@@ -798,7 +800,7 @@ AlphaFold 3 is:
 - Diffusion-based  
 - Unified interaction modeling  
 
-If AlphaFold 2 acts as a geometric constraint solver, AlphaFold 3 behaves as a learned molecular simulator guided by relational context.
+If AlphaFold 2 acts as a geometric solver, AlphaFold 3 behaves more like a learned molecular simulator guided by relational context.
 
 
 ---
