@@ -1,5 +1,5 @@
-title: "AlphaFold Blog"
-name: "Radu Savancea"
+title: "Radu-Mihai Savancea"
+name: "Radu-Mihai Savancea"
 description: "Deep learning and protein structure prediction"
 
 remote_theme: "mmistakes/minimal-mistakes"
@@ -10,7 +10,7 @@ plugins:
 minimal_mistakes_skin: "default"
 
 author:
-  name: "Radu Savancea"
+  name: "Radu-Mihai Savancea"
   bio: "Exploring deep learning, scientific AI, and a world with more bits than atoms"
   location: "Stuttgart"
   avatar: "/assets/images/profile.png"
