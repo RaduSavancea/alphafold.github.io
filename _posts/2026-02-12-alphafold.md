@@ -13,7 +13,7 @@ tags: [Protein Folding, Evoformer, Geometry, MSA, CASP]
 
 This blog post explores the fundamental concepts of protein folding and the key architectural components behind AlphaFold 2 and AlphaFold 3.
 
-AlphaFold represents a pivotal achievement in biological AI, particularly in **3D protein structure prediction**. The work led to the 2024 Nobel Prize in Chemistry being awarded to **Demis Hassabis**, leader of the AlphaFold project, and **John Jumper**, for groundbreaking contributions to computational biology and protein folding prediction.
+AlphaFold represents a pivotal achievement in biological AI, particularly in **3D protein structure prediction**. The work led to the 2024 Nobel Prize in Chemistry being awarded to Demis Hassabis, leader of the AlphaFold project, and John Jumper, for groundbreaking contributions to computational biology and protein folding prediction.
 
 We begin with the biological foundations before moving towards the deep learning architectures that enabled this breakthrough. While this post primarily focuses on protein structures, it is important to note that AlphaFold 3 extends beyond isolated proteins and is capable of modeling full biomolecular complexes, including interactions with DNA, RNA, ligands, and ions.
 
@@ -45,7 +45,7 @@ Although the amino acid sequence encodes the primary structural information of a
 
 ## Amino Acids — The Building Blocks
 
-Proteins are composed of one or more **chains of amino acids**. Each amino acid is an organic molecule built around a central carbon atom, known as the C-α atom, which is bonded to four distinct groups: an amino group (NH₂), a carboxyl group (COOH), a hydrogen atom, and a variable side chain, often referred to as the R-group.
+Proteins are composed of one or more chains of amino acids. Each amino acid is an organic molecule built around a central carbon atom, known as the C-α atom, which is bonded to four distinct groups: an amino group (NH₂), a carboxyl group (COOH), a hydrogen atom, and a variable side chain, often referred to as the R-group.
 
 <figure style="text-align: center;">
   <img src="{{ '/assets/images/amino_acid.png' | relative_url }}" alt="Amino Acid Structure" width="500">
@@ -56,7 +56,7 @@ Proteins are composed of one or more **chains of amino acids**. Each amino acid 
   </figcaption>
 </figure>
 
-The side chain determines the chemical and physical properties of the amino acid. In nature, there are **20 standard amino acids**, each characterized by a unique side chain and represented by a one-letter code. Once incorporated into a protein chain, an amino acid is referred to as a **residue**.
+The side chain determines the chemical and physical properties of the amino acid. In nature, there are 20 standard amino acids, each characterized by a unique side chain and represented by a one-letter code. Once incorporated into a protein chain, an amino acid is referred to as a **residue**.
 
 When amino acids connect, they form peptide bonds through a dehydration synthesis reaction. The carboxyl group of one amino acid reacts with the amino group of another, releasing a water molecule and forming a stable covalent linkage.
 
@@ -91,7 +91,7 @@ Understanding protein folding is therefore central to medicine, drug discovery, 
 
 Protein misfolding is linked to numerous diseases. For example, the accumulation of misfolded amyloid proteins plays a central role in Alzheimer’s disease, while structural abnormalities in regulatory proteins are associated with various forms of cancer. When proteins fail to adopt their correct three-dimensional conformation, they can lose functionality or become toxic to cells.
 
-Understanding protein folding is therefore central to several major scientific and industrial fields. In **medicine**, structural insight enables the identification of disease mechanisms at the molecular level. In **drug discovery**, knowledge of a protein’s three-dimensional structure allows researchers to design molecules that precisely bind to active or regulatory sites. In **biotechnology**, engineered proteins with specific structural properties can be developed for industrial enzymes, synthetic biology applications, or targeted therapies.
+Understanding protein folding is therefore central to several major scientific and industrial fields. In medicine, structural insight enables the identification of disease mechanisms at the molecular level. In drug discovery, knowledge of a protein’s three-dimensional structure allows researchers to design molecules that precisely bind to active or regulatory sites. In biotechnology, engineered proteins with specific structural properties can be developed for industrial enzymes, synthetic biology applications, or targeted therapies.
 
 Improved insight into folding mechanisms directly supports the development of new pharmaceuticals. By understanding how proteins fold and interact, researchers can predict binding interfaces, stabilize unstable proteins, and design inhibitors that block harmful interactions.
 
@@ -129,7 +129,7 @@ The effort to determine protein structures dates back to the 1950s and marks the
 
 Two major approaches have been developed to determine protein structures: experimental methods and computational methods.
 
-Experimental techniques such as **X-ray crystallography** expose crystallized proteins to X-rays and reconstruct electron density maps from diffraction patterns. A typical X-ray pipeline involves protein crystallization, a particularly challenging step for membrane proteins due to their low solubility, followed by X-ray diffraction and reconstruction of electron density maps. One of the central technical challenges in this process is the *phase problem*, which requires specialized methods to resolve. Even after obtaining an electron density map, reconstructing the final 3D atomic model involves a degree of interpretation; especially at lower resolutions, two experts may produce slightly different structural models from the same data. While highly accurate, this method captures only the final folded structure, requires substantial laboratory effort, and is expensive — often costing on the order of \$100,000–\$1,000,000 per structure <sup><a href="#ref3">[3]</a></sup>.
+Experimental techniques such as **X-ray crystallography** expose crystallized proteins to X-rays and reconstruct electron density maps from diffraction patterns. A typical X-ray pipeline involves protein crystallization, a particularly challenging step for membrane proteins due to their low solubility, followed by X-ray diffraction and reconstruction of electron density maps. One of the central technical challenges in this process is the *phase problem*, which requires specialized methods to resolve. Even after obtaining an electron density map, reconstructing the final 3D atomic model involves a degree of interpretation; especially at lower resolutions, two experts may produce slightly different structural models from the same data. While highly accurate, this method captures only the final folded structure, requires substantial laboratory effort, and is expensive, often costing over \$100,000 per structure <sup><a href="#ref3">[3]</a></sup>.
 
 
 **Nuclear magnetic resonance (NMR)** spectroscopy measures protein structures in solution and can capture dynamics on very small time scales, which is important because folding and conformational transitions can occur on the order of 50–3000 s⁻¹. However, NMR is generally limited to smaller proteins and can be experimentally demanding.
@@ -189,7 +189,7 @@ Conceptually, the system operates in two major stages:
 
 ## Input Feature Extraction
 
-The input to AlphaFold 2 is a single amino acid sequence of length \( N \). From this sequence, the model constructs two primary feature tensors:
+The input to AlphaFold 2 is a single amino acid sequence of length ***N***. From this sequence, the model constructs two primary feature tensors:
 
 - A **Multiple Sequence Alignment (MSA)** representation  
 - A **Pair representation**
@@ -210,7 +210,7 @@ By aligning homologues in this way, corresponding residues across species are pl
 This alignment encodes powerful evolutionary signals:
 
 - **Conservation** of a column often implies structural or functional importance (e.g., catalytic residues, ligand binding sites).
-- **Co-evolution** between two columns suggests structural coupling — if residue \( i \) mutates and residue \( j \) consistently mutates in response, the two residues are likely interacting in 3D space.
+- **Co-evolution** between two columns suggests structural coupling — if residue *i* mutates and residue *j* consistently mutates in response, the two residues are likely interacting in 3D space.
 
 Intuitively, if two residues participate in a bonding mechanism, mutating one without compensating changes would destabilize the protein. Therefore, correlated mutations preserve structural integrity <sup><a href="#ref4">[4]</a></sup>.
 
@@ -257,7 +257,7 @@ $$
 \mathrm{Pair} \in \mathbb{R}^{N \times N \times c_z}
 $$
 
-Each element is a learned feature vector encoding the model’s current belief about how residues \( i \) and \( j \) relate geometrically.
+Each element is a learned feature vector encoding the model’s current belief about how residues *i* and *j* relate geometrically.
 
 
 This tensor can be interpreted as a **complete graph over residues**, where:
@@ -279,7 +279,7 @@ The Evoformer iteratively refines both representations, allowing evolutionary si
 
 ## The Evoformer: Iterative Representation Refinement
 
-The Evoformer is the core reasoning engine of AlphaFold 2. It consists of a deep stack of blocks that iteratively refine both the MSA and pair representations.
+The Evoformer is the core reasoning engine of AlphaFold 2. It consists of a deep stack of blocks (48 in total) that iteratively refine both the MSA and pair representations.
 
 Within each block:
 
@@ -298,62 +298,141 @@ Conceptually, the Evoformer behaves like a learned constraint solver operating o
 
 ---
 
-### Axial Attention in the MSA
+### Row-wise Attention — Unfolding Along Residues
 
-AlphaFold applies **axial attention**, meaning attention is performed separately along each dimension of the MSA tensor.
+In row attention, we fix a particular sequence and look across its residues.
 
-#### Row Attention (Across Residues)
+Conceptually:
 
-For a fixed sequence index \( s \):
-
-$$
-\mathrm{MSA}(s, :, :) \in \mathbb{R}^{N \times c_m}
-$$
-
-Queries, keys, and values are computed as:
+- We take one row of the MSA  
+- That row has shape  
 
 $$
-Q_{s,i} = W_Q x_{s,i}, \quad
-K_{s,j} = W_K x_{s,j}, \quad
-V_{s,j} = W_V x_{s,j}
+N \times c_m
 $$
 
-Attention weights:
+- We apply standard self-attention across the residue axis  
+
+This captures how residues within a single protein chain influence each other — including long-range interactions between distant amino acids.
+
+Importantly, this attention is **biased by the pair representation**.
+
+The pair tensor provides prior relational knowledge about which residue pairs are likely to interact. This information is injected into the attention logits as a bias term.
+
+So row attention is not purely sequence-based. It is informed by evolving geometric hypotheses stored in the pair tensor.
+
+In summary, row attention answers:
+
+> Given this specific protein sequence, how do its residues interact with each other?
+
+---
+
+### Column-wise Attention — Unfolding Along Sequences
+
+In column attention, we fix a residue position and look across all homologous sequences.
+
+Conceptually:
+
+- We take one column of the MSA  
+- That column has shape  
 
 $$
-\alpha_{s,i,j} =
-\mathrm{softmax}_j
-\left(
-\frac{Q_{s,i} \cdot K_{s,j}}{\sqrt{d}} + b_{i,j}
-\right)
+N_{\text{seq}} \times c_m
 $$
 
-Here, \( b_{i,j} \) is derived from the pair representation, allowing relational geometry to bias MSA attention.
+- We apply self-attention across the sequence axis  
 
-The updated embedding is:
+This allows the model to reason about evolutionary variation at a specific residue position.
+
+Column attention captures:
+
+- Conservation signals  
+- Mutation patterns  
+- Co-evolutionary statistics  
+
+In other words, it models how a single structural position behaves across evolutionary time.
+
+Row attention integrates structural interactions within a sequence, while column attention integrates evolutionary statistics across sequences.
+
+---
+
+### Why Axial Attention?
+
+If we attempted full attention over the entire MSA tensor, the computational cost would scale quadratically with the total number of elements:
 
 $$
-x'_{s,i} = \sum_{j=1}^{N} \alpha_{s,i,j} V_{s,j}
+\mathcal{O}((N_{\text{seq}} \cdot N)^2)
 $$
 
-Row attention captures **long-range intra-sequence dependencies**, modeling how distant residues influence one another.
+This would be intractable.
+
+Axial attention reduces complexity by factorizing attention along individual modes:
+
+$$
+\mathcal{O}(N_{\text{seq}} \cdot N^2 + N \cdot N_{\text{seq}}^2)
+$$
+
+This makes training feasible while preserving expressive power.
 
 ---
 
 ### Triangle Updates: Enforcing Geometric Consistency
 
-Pairwise relationships alone cannot guarantee global consistency in 3D space. If residue \( i \) is close to \( k \), and \( k \) is close to \( j \), then \( i \) cannot be arbitrarily far from \( j \).
+Pairwise residue predictions alone cannot guarantee a globally consistent 3D structure.
 
-AlphaFold enforces this consistency through:
+If residue *i* is close to *k*, and *k* is close to *j*, then *i* cannot be arbitrarily far from *j*. In Euclidean space, distances must satisfy:
 
-- **Triangle attention**
-- **Triangle multiplicative updates**
+$$
+d(i,j) \le d(i,k) + d(k,j)
+$$
 
-For a fixed pair \( (i,j) \), triangle attention aggregates information over all third residues \( k \), allowing geometric constraints to propagate transitively through the residue graph.
+AlphaFold does not enforce this constraint explicitly. Instead, it introduces **triangle updates** in the pair representation so that geometric consistency can emerge naturally.
 
-Triangle multiplicative updates perform learned multiplicative interactions across residue triplets, resembling message passing in graph neural networks.
+---
 
-Importantly, no explicit triangle inequality is imposed in the loss. Instead, geometric consistency emerges because inconsistent relational structures increase downstream structural error.
+#### Triangle Attention
+
+The pair tensor can be interpreted as a complete graph over residues.  
+Each edge stores a learned embedding describing how two residues relate.
+
+To update the relationship between residues *i* and *j*, the model considers all possible third residues *k*. In other words, it reasons over triangles (*i*, *j*, *k*).
+
+The attention weights over the intermediate residue *k* are computed as:
+
+$$
+\alpha_{ijk}
+=
+\mathrm{softmax}_k
+\left(
+\frac{Q_{ik} \cdot K_{jk}}{\sqrt{c}}
++
+b_{jk}
+\right)
+$$
+
+The updated pair embedding becomes:
+
+$$
+z'_{ij}
+=
+\sum_k \alpha_{ijk} V_{jk}
+$$
+
+Intuitively, residue *k* acts as a mediator between *i* and *j*.  
+If both (*i*, *k*) and (*j*, *k*) strongly suggest compatibility, this influences the updated belief about (*i*, *j*).
+
+AlphaFold applies this mechanism symmetrically (around both starting and ending nodes), ensuring that information flows consistently across the triangle.
+
+---
+
+### Why This Matters
+
+Triangle attention allows local pairwise predictions to become globally coherent. Instead of predicting each residue pair independently, the model refines relationships by checking their compatibility with surrounding residues.
+
+No hard geometric rule is imposed. Instead, inconsistent relational patterns increase downstream structural error, and gradients flow back through these triangle updates to restore consistency.
+
+Together with axial attention in the MSA stack, triangle updates transform evolutionary signals into a globally consistent relational structure — before any 3D coordinates are ever predicted.
+
 
 ---
 
@@ -388,6 +467,7 @@ $$
 R_i \in SO(3) \quad \text{is a rotation matrix}, \qquad
 t_i \in \mathbb{R}^3 \quad \text{is a translation vector}.
 $$
+
 Initially:
 
 $$
