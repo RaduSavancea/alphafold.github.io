@@ -189,7 +189,7 @@ Conceptually, the system operates in two major stages:
 
 ## Input Feature Extraction
 
-The input to AlphaFold 2 is a single amino acid sequence of length $N$. From this sequence, the model constructs two primary feature tensors:
+The input to AlphaFold 2 is a single amino acid sequence of length \( N \). From this sequence, the model constructs two primary feature tensors:
 
 - A **Multiple Sequence Alignment (MSA)** representation  
 - A **Pair representation**
@@ -210,7 +210,7 @@ By aligning homologues in this way, corresponding residues across species are pl
 This alignment encodes powerful evolutionary signals:
 
 - **Conservation** of a column often implies structural or functional importance (e.g., catalytic residues, ligand binding sites).
-- **Co-evolution** between two columns suggests structural coupling — if residue $i$ mutates and residue $j$ consistently mutates in response, the two residues are likely interacting in 3D space.
+- **Co-evolution** between two columns suggests structural coupling — if residue \( i \) mutates and residue \( j \) consistently mutates in response, the two residues are likely interacting in 3D space.
 
 Intuitively, if two residues participate in a bonding mechanism, mutating one without compensating changes would destabilize the protein. Therefore, correlated mutations preserve structural integrity <sup><a href="#ref4">[4]</a></sup>.
 
@@ -227,7 +227,7 @@ N_{\text{seq}} \text{ is the number of aligned sequences,}
 $$
 
 $$
-N \text{ is the number of residues,}
+N \text{ is the number of residues contained in the protein,}
 $$
 
 $$
@@ -257,7 +257,7 @@ $$
 \mathrm{Pair} \in \mathbb{R}^{N \times N \times c_z}
 $$
 
-Each element \( \mathrm{Pair}[i,j] \) is a learned feature vector encoding the model’s current belief about how residues \( i \) and \( j \) relate geometrically.
+Each element is a learned feature vector encoding the model’s current belief about how residues \( i \) and \( j \) relate geometrically.
 
 
 This tensor can be interpreted as a **complete graph over residues**, where:
@@ -384,9 +384,10 @@ $$
 
 where:
 
-- \( R_i \in SO(3) \) is a rotation matrix  
-- \( t_i \in \mathbb{R}^3 \) is a translation vector  
-
+$$
+R_i \in SO(3) \quad \text{is a rotation matrix}, \qquad
+t_i \in \mathbb{R}^3 \quad \text{is a translation vector}.
+$$
 Initially:
 
 $$
