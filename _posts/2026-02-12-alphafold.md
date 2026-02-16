@@ -695,7 +695,7 @@ The treatment of equivariance also evolves. In AlphaFold 2, SE(3)-equivariance w
 Before AlphaFold 3, AlphaFold 2 fundamentally changed the field at CASP14 (2020).  
 The table below shows the progression of leading methods across CASP editions.
 
-<p align="center">
+
 
 | CASP Edition | Year | Top GDT_TS | Leading Method                         |
 |--------------|------|------------|----------------------------------------|
@@ -706,7 +706,6 @@ The table below shows the progression of leading methods across CASP editions.
 | CASP13       | 2018 | 65         | AlphaFold 1 (DeepMind)                 |
 | CASP14       | 2020 | **92.4**   | **AlphaFold 2 (DeepMind)**             |
 
-</p>
 
 At CASP14, AlphaFold 2 achieved a median GDT-TS score of 92.4, drastically surpassing previous methods.  
 For many targets, predictions reached near-experimental accuracy, with Cα RMSD values close to 1 Å.
@@ -732,7 +731,7 @@ On the recent PDB low-homology subset, AlphaFold 3 consistently outperforms Alph
 <figure style="text-align: center;">
   <img src="{{ '/assets/images/ProteinProtein.JPG' | relative_url }}" width="750">
   <figcaption>
-    <strong>Figure 8:</strong> AlphaFold 3 improvements for protein–protein interactions(Abramson et al., 2024) <sup><a href="#ref7">[7]</a></sup>.
+    <strong>Figure 8:</strong> AlphaFold 3 improvements for protein–protein interactions (Abramson et al., 2024) <sup><a href="#ref7">[7]</a></sup>.
   </figcaption>
 </figure>
 
