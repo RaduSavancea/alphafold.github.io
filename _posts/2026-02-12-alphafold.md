@@ -173,7 +173,7 @@ Many mutations are tolerated without disrupting overall fold, allowing sequence 
 
 This observation is central. If structure changes slowly while sequences mutate, then comparing homologous sequences across species allows us to infer structural constraints indirectly.
 
-Rather than predicting structure directly from physics-based simulation, AlphaFold 2 learns a representation of residue–residue relationships extracted from evolutionary variation and then converts this relational structure into three-dimensional geometry through an equivariant structure module.
+Rather than predicting structure directly from physics-based simulations, AlphaFold 2 learns a representation of residue–residue relationships extracted from evolutionary variation and then converts this relational structure into a three-dimensional object through an equivariant structure module.
 
 Conceptually, the system operates in two major stages:
 
@@ -210,7 +210,7 @@ By aligning homologues in this way, corresponding residues across species are pl
 This alignment encodes powerful evolutionary signals:
 
 - **Conservation** of a column often implies structural or functional importance (e.g., catalytic residues, ligand binding sites).
-- **Co-evolution** between two columns suggests structural coupling — if residue *i* mutates and residue *j* consistently mutates in response, the two residues are likely interacting in 3D space.
+- **Co-evolution** between two columns suggests structural coupling; if residue *i* mutates and residue *j* consistently mutates in response, the two residues are likely interacting in 3D space.
 
 Intuitively, if two residues participate in a bonding mechanism, mutating one without compensating changes would destabilize the protein. Therefore, correlated mutations preserve structural integrity <sup><a href="#ref4">[4]</a></sup>.
 
@@ -227,7 +227,7 @@ $$
 
 This tensor does not explicitly encode distances. Instead, it encodes **evolutionary constraints**, from which geometric structure can be inferred.
 
-Evolution therefore acts as indirect supervision for 3D structure prediction.
+Evolution therefore acts as indirect supervision for the 3D structure prediction.
 
 <figure style="text-align: center;">
   <img src="{{ '/assets/images/Coevolution.JPG' | relative_url }}" width="650">
@@ -238,17 +238,17 @@ Evolution therefore acts as indirect supervision for 3D structure prediction.
 
 ### Pair Representation
 
-While the MSA captures evolutionary variation, protein structure itself is fundamentally about **relationships between residues**. To reason explicitly about residue–residue interactions, AlphaFold maintains a second tensor:
+While the MSA captures evolutionary variation, protein structure itself is fundamentally about **relationships between residues**. To reason explicitly about residue–residue interactions, AlphaFold maintains a second 3D tensor:
 
 $$
 \mathrm{Pair} \in \mathbb{R}^{N \times N \times c_z}
 $$
 
-Each element of this tensor is a learned feature vector encoding the model’s current belief about how residues *i* and *j* relate geometrically.
+Each slice of this tensor is a learned feature vector encoding the model’s current belief about how residues *i* and *j* relate geometrically.
 
-This representation can be interpreted as a complete graph over residues: each residue corresponds to a node, and every pair of residues is connected by an edge that stores relational features. Unlike classical contact maps, however, the Pair representation does not explicitly encode distances. Instead, it maintains a high-dimensional latent representation capable of supporting flexible geometric reasoning.
+This representation can be interpreted as a complete graph over residues: each residue corresponds to a node, and every pair of residues is connected by an edge that stores relational features.
 
-Together, the MSA tensor and the Pair tensor provide complementary perspectives. The MSA captures evolutionary constraints across species, whereas the Pair representation models geometric relationships within a single protein. The Evoformer iteratively refines both representations, allowing evolutionary signals to shape geometric reasoning before any three-dimensional coordinates are predicted.
+Together, the MSA tensor and the Pair tensor provide complementary perspectives. The MSA captures evolutionary constraints across species, whereas the Pair representation models geometric relationships within a single protein. 
 
 
 ---
@@ -259,12 +259,12 @@ The Evoformer is the core reasoning engine of AlphaFold 2. It consists of a deep
 
 Within each block, two complementary processes take place:
 
-- Evolutionary information is refined through axial attention (row-wise and column-wise) in the MSA stack  
-- Geometric relationships are refined through triangle updates in the pair stack, that respect the triangle inequality  
+- Evolutionary information is learned through axial attention (row-wise and column-wise) in the MSA stack  
+- Geometric relationships are refined through triangle updates on the pair stack, that respect the triangle inequality  
 
 Crucially, information flows bidirectionally between these two representations. 
 
-The Evoformer can be seen as a learned system that reasons over a network of residues connected by evolutionary information. By refining this network step by step, it turns patterns found in evolution into a consistent internal model of the protein’s 3D structure and lays the basis representation for the later structure prediction.
+As the network trunk is progressively refined, evolutionary patterns become embedded within the representations, providing the foundation for reconstructing the protein’s three-dimensional structure.
 
 <figure style="text-align: center;">
   <img src="{{ '/assets/images/Evo.JPG' | relative_url }}" width="700">
@@ -277,10 +277,10 @@ The Evoformer can be seen as a learned system that reasons over a network of res
 
 Applying full attention over the entire tensor would be computationally infeasible. Instead, AlphaFold factorizes attention along individual tensor modes after unfolding them, technique known as **axial attention**.
 
-This means attention is applied along one axis at a time:
+This means that attention is applied along one axis at a time, with the tensor unfolded along the specific mode of interest:
 
-- Along residues (row-wise attention)  
-- Along sequences (column-wise attention)  
+- Along residues (row-wise attention; mode-2 tensor unfolding)  
+- Along sequences (column-wise attention; mode-1 tensor unfolding)  
 
 
 ---
@@ -297,9 +297,7 @@ is selected, and self-attention is applied along the residue axis.
 
 This operation captures long-range interactions between residues within a single protein chain.
 
-Importantly, row-wise attention is **biased by the pair representation**. The pair tensor provides relational information about which residue pairs are likely to interact. This information is incorporated into the attention logits as an additive bias term. As a result, residue interactions are not inferred purely from sequence context but are guided by evolving geometric hypotheses.
-
-Row-wise attention therefore integrates structural reasoning within a single sequence.
+Importantly, row-wise attention is biased by the pair representation. The pair tensor provides relational information about which residue pairs are likely to interact. This information is incorporated into the attention logits as an additive bias term. 
 
 ---
 
@@ -315,31 +313,29 @@ $$
 
 is selected, and self-attention is applied along the sequence axis.
 
-This mechanism captures evolutionary variation at a specific residue position. Signals such as conservation, mutation patterns and co-evolutionary statistics are integrated.
+This mechanism captures evolutionary variation at a specific residue position. Signals such as conservation, mutation patterns and co-evolutionary are extracted.
 
-Column-wise attention therefore models how a structural position behaves across evolutionary time.
-
-Together, row and column attention allow the Evoformer to extract meaningful information from evolution process while simultaneously organizing them along the protein chain.
+Column-wise attention therefore models how a structural position behaves across evolutionary time. Together, row and column attention allow the Evoformer to extract meaningful information from evolution process.
 
 ---
 
 ## Triangle Updates: Enforcing Geometric Consistency
 
-While axial attention extracts evolutionary constraints, it does not by itself guarantee geometric consistency. This is why the triangular updates try to enforce geomerty into the model.
+While axial attention extracts evolutionary patterns, it does not by itself guarantee geometric consistency. This is why the triangular updates try to enforce geomerty into the model.
 
-If residue *i* is predicted to be close to residue *k*, and residue *k* is close to residue *j*, then residue *i* cannot be arbitrarily far from residue *j*. In Euclidean space, distances must satisfy:
+If residue *i* is predicted to be close to residue *k*, and residue *k* is close to residue *j*, then residue *i* cannot be arbitrarily far from residue *j*. In Euclidean space, distances must satisfy the triangle inequality:
 
 $$
 d(i,j) \le d(i,k) + d(k,j)
 $$
 
-AlphaFold does not hard-code this constraint into the loss function. Instead, it introduces **triangle updates** within the pair representation so that such consistency can emerge naturally.
+AlphaFold does not hard-code this constraint into the loss function. Instead, it introduces triangle updates within the pair representation, allowing geometric consistency to emerge through the architecture itself.
 
 ---
 
 ### Triangle Attention
 
-The pair tensor can be interpreted as a complete graph over residues, where each edge stores a learned embedding describing the relationship between two residues.
+The pair tensor, as we previously mentioned, can be interpreted as a complete graph over residues, where each edge stores a learned embedding describing the relationship between two residues.
 
 To update the relationship between residues *i* and *j*, the model considers all possible third residues *k*. In other words, it reasons over triangles (*i*, *j*, *k*).
 
@@ -373,13 +369,11 @@ A symmetric variant ensures that information flows consistently around both orie
 
 ### Why This Matters
 
-Triangle attention allows local pairwise predictions to become globally coherent. Instead of treating each residue pair independently, the model checks their compatibility with surrounding residues.
+Triangle attention allows local pairwise predictions to become globally coherent and respect the geometry of the Euclidian space. Instead of treating each residue pair independently, the model assures their compatibility with other surrounding residues.
 
 No explicit geometric rule is imposed. Instead, geometry is enforced through the way in which the attention mecanishm is built, encouraging the pair representation to become geometrically consistent.
 
-In combination, axial attention extracts evolutionary constraints, and triangle updates enforce their geometric compatibility. Through repeated stacking of Evoformer blocks, statistical signals are gradually transformed into a globally consistent geometric-aware representations, ready to be realized as three-dimensional structure.
-
-
+The combination of axial attention, which extracts evolutionary patterns, and triangle attention, which enforces geometric structure, makes the learned feature representation rich and lays the foundation for the structure module.
 
 ---
 
@@ -387,7 +381,7 @@ In combination, axial attention extracts evolutionary constraints, and triangle 
 
 After the Evoformer produces a consistent relational representation, AlphaFold translates this abstract structure into explicit 3D coordinates.
 
-The Structure Module performs this translation. It treats the protein not as a continuous chain at first, but as a collection of independent rigid units, also denoted in the paper as a **residue gas**.
+The Structure Module performs this transition. It treats the protein not as a continuous chain at first, but as a collection of independent rigid units, also denoted in the paper as a **residue gas**.
 
 Each amino acid is modeled as a rigid triangle defined by its backbone atoms (N, Cα, C). Importantly, these residues are initially *disconnected* and placed at the origin (idea of cutting the peptide chain). The polymer chain constraint is temporarily ignored. The network must therefore learn how to assemble this unordered collection of rigid residues into a coherent three-dimensional structure
 
@@ -472,7 +466,7 @@ Intuitively, residues attend more strongly to nearby residues in 3D space. The c
 
 ### Frame Updates
 
-After attention, the network predicts incremental rigid-body updates:
+After the attention mechanism, the network predicts incremental rigid-body updates:
 
 $$
 \Delta R_i, \quad \Delta t_i
@@ -490,14 +484,14 @@ $$
 
 These updates are applied iteratively (typically around 8 refinement steps). Early iterations establish coarse global layout, while later iterations refine local geometry.
 
-This process resembles a learned geometric optimization procedure operating directly in SE(3).
+This process resembles a learned geometric optimization procedure operating directly in the SE(3) group.
 
 
 ---
 
 ### Reintroducing the Chain: Backbone and Side-Chain Construction
 
-Once backbone frames are refined, atomic coordinates are placed deterministically.
+Once the backbone frames are refined, atomic coordinates are placed deterministically.
 
 For atom *a* in residue *i*:
 
@@ -531,16 +525,16 @@ Bond lengths and bond angles remain fixed, ensuring chemically valid geometry.
 
 AlphaFold 2 separates protein folding into two conceptual phases:
 
-1. **Learning relational constraints in representation space (Evoformer)**
-2. **Converting relational structure into 3D geometry (Structure Module)**
+1. **Learning relational evolutionary patterns and residue interactions in representation space (Evoformer)**
+2. **Converting relational structure into three-dimensional geometry (Structure Module)**
 3. **Refining geometry through SE(3)-equivariant updates**
 
-This separation between high-dimensional relational reasoning and geometric instantiation is one of the central architectural innovations that enabled AlphaFold 2 to achieve near-experimental accuracy in CASP.
+This separation between high-dimensional relational reasoning and geometric knowledge is one of the central architectural innovations that enabled AlphaFold 2 to achieve near-experimental accuracy in CASP.
 
 
 # AlphaFold 3 
 
-AlphaFold 3 represents a substantial architectural evolution of the AlphaFold framework. While many core principles from AlphaFold 2 remain unchanged: relational reasoning, pairwise representations, deep iterative refinement; the mechanism used to generate structure changes fundamentally.
+AlphaFold 3 represents a substantial architectural step forward of the AlphaFold framework, moving toward more general structure prediction. While many core principles from AlphaFold 2 remain unchanged: relational reasoning, pairwise representations, deep iterative refinement; the mechanism used to generate molecular structure changes fundamentally.
 
 Instead of predicting a single rigidly refined protein structure, AlphaFold 3 models:
 
@@ -557,7 +551,7 @@ This transition required a conceptual change: from geometric constraint solving 
 ---
 
 
-## Architectural Continuity and Change
+## Architectural Differences
 
 Despite the generative shift, the high-level structure resembles AlphaFold 2:
 
@@ -602,7 +596,7 @@ The Pairformer in AlphaFold 3 simplifies and generalizes this architecture.
 
 <figure style="text-align: center;">
   <img src="{{ '/assets/images/AF3.PNG' | relative_url }}" width="750">
-  <figcaption><strong>Figure 8:</strong> Overall AlphaFold 3 architecture.</figcaption>
+  <figcaption><strong>Figure 8:</strong> AlphaFold 3 architecture (Abramson et al., 2024) <sup><a href="#ref7">[7]</a></sup>.</figcaption>
 </figure>
 
 Key differences include:
@@ -695,6 +689,78 @@ This probabilistic formulation enables:
 The treatment of equivariance also evolves. In AlphaFold 2, SE(3)-equivariance was enforced explicitly through specialized architectural components such as IPA. In AlphaFold 3, rigid-body equivariance is encouraged statistically through a combination of equivariant conditioning and random rotation–translation data augmentation applied during training. Rather than hard-coding symmetry into attention updates, the model learns to respect geometric symmetries within the diffusion framework.
 
 # Experiments and Results
+
+## Historical Context: CASP Performance Progression
+
+Before AlphaFold 3, AlphaFold 2 fundamentally changed the field at CASP14 (2020).  
+The table below shows the progression of leading methods across CASP editions.
+
+| CASP Edition | Year | Top GDT_TS | Leading Method                         |
+|--------------|------|------------|----------------------------------------|
+| CASP5        | 2002 | 40         | Rosetta                                |
+| CASP7        | 2006 | 50         | Rosetta (fragment assembly)            |
+| CASP10       | 2012 | 55         | Zhang-Server (QUARK)                   |
+| CASP12       | 2016 | 55         | RaptorX, Baker-Robetta                 |
+| CASP13       | 2018 | 65         | AlphaFold 1 (DeepMind)                 |
+| CASP14       | 2020 | **92.4**   | **AlphaFold 2 (DeepMind)**             |
+
+At CASP14, AlphaFold 2 achieved a median GDT-TS score of 92.4, drastically surpassing previous methods.  
+For many targets, predictions reached near-experimental accuracy, with Cα RMSD values close to 1 Å.
+
+AlphaFold 3 extends this success beyond protein folding into full biomolecular interaction modeling.
+
+## Evaluation Datasets in AlphaFold 3
+
+Unlike AlphaFold 2, which was primarily evaluated on folding benchmarks such as CASP, AlphaFold 3 was tested on a broader range of interaction-focused datasets. The goal was not only to assess folding accuracy, but to evaluate how well the model predicts full molecular assemblies.
+
+AlphaFold 3 was evaluated on 8,856 PDB complexes released between May 1, 2022, and January 12, 2023. High-homology chains (>40% sequence identity to the training set) were removed, and chains and interfaces were scored separately. A low-homology subset was used for direct protein–protein comparison against AlphaFold-Multimer v2.3.
+
+For antibody–antigen systems, a dedicated subset of 71 complexes (166 interfaces across 65 interface clusters) was analyzed. These systems are particularly challenging due to flexible loops and highly specific binding geometries.
+
+Protein–ligand performance was evaluated using the PoseBusters benchmark (v1 and v2), which includes chemical validity checks, steric clash detection, and pocket-aligned ligand RMSD with a success threshold of < 2 Å. Crystallization artifacts and glycans were removed to ensure fair comparison.
+
+Additionally, AlphaFold 3 was evaluated on several CASP15 RNA targets (R1116, R1117, R1126, R1128, R1136, R1138, R1189, R1190) and compared against RF2NA and other RNA prediction systems <sup><a href="#ref7">[7]</a></sup>.
+
+## Protein–Protein Interactions
+
+On the recent PDB low-homology subset, AlphaFold 3 consistently outperforms AlphaFold-Multimer v2.3. Improvements are observed across general protein–protein interfaces and are particularly pronounced for antibody–antigen complexes.
+
+<figure style="text-align: center;">
+  <img src="{{ '/assets/images/ProteinProtein.PNG' | relative_url }}" width="750">
+  <figcaption>
+    <strong>Figure 8:</strong> AlphaFold 3 improvements for protein–protein interactions compared to previous baselines (Abramson et al., 2024) <sup><a href="#ref7">[7]</a></sup>.
+  </figcaption>
+</figure>
+
+---
+
+# Protein–Ligand Prediction Improvements
+
+Another striking advance mentioned in the results section of the AlphaFold 3 paper is its unified modeling of protein–ligand systems. Unlike traditional docking pipelines, AF3 does not require a predefined binding pocket and does not separate folding from docking. Instead, ligand poses are generated through the same diffusion process used for protein structure refinement.
+
+<figure style="text-align: center;">
+  <img src="{{ '/assets/images/ProteinLing.JPG' | relative_url }}" width="750">
+  <figcaption>
+    <strong>Figure 9:</strong> AlphaFold 3 improvements for protein–ligand prediction evaluated on PoseBusters and recent PDB datasets (Abramson et al., 2024) <sup><a href="#ref7">[7]</a></sup>.
+  </figcaption>
+</figure>
+
+# Broader Implications
+
+Taken together, these results illustrate a conceptual shift.
+
+AlphaFold 2 established that deep learning could solve single-chain protein folding with near-experimental accuracy. AlphaFold 3 extends this paradigm toward unified interaction modeling across proteins, ligands, nucleic acids, and other biomolecular components.
+
+The empirical gains in protein–protein and protein–ligand benchmarks suggest as well that diffusion-based generative modeling provides improved robustness in structurally diverse systems.
+
+
+# Broader Implications
+
+Taken together, these results illustrated a conceptual shift.
+
+AlphaFold 2 established that deep learning could solve single-chain protein folding with near-experimental accuracy. AlphaFold 3 extended this paradigm towards a more unified interaction modeling across proteins, ligands, nucleic acids, and other biomolecular components.
+
+The empirical gains in protein–protein and protein–ligand benchmarks suggest as well that the diffusion-based generative modeling provideed improved robustness in structurally diverse systems.
 
 # Concluding Thoughts and Limitations
 
