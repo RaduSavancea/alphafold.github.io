@@ -2,7 +2,7 @@
 title: "AlphaFold — A Deep Learning Breakthrough in Protein Structure Prediction"
 math: true
 layout: single
-date: 2026-02-12
+date: 2026-02-16
 author_profile: true
 classes: wide
 categories: [AlphaFold]
@@ -763,19 +763,17 @@ The empirical gains in protein–protein and protein–ligand benchmarks suggest
 # Concluding Thoughts and Limitations
 
 
-Although AlphaFold represents a major breakthrough in structure prediction, important limitations remain. These become particularly visible in the transition from AlphaFold 2 to the more generative AlphaFold 3 framework.
+Although AlphaFold represents a major breakthrough in protein structure prediction, important limitations remain. These become especially visible in the transition from the more deterministic AlphaFold 2 to the generative AlphaFold 3 framework.
 
-One issue observed in the AlphaFold 3 paper is the appearance of structured predictions in regions that are experimentally known to be intrinsically disordered. These regions do not adopt a single stable conformation in reality, yet the model may generate ordered structures for them. This behavior is often referred to as "hallucination". In most cases, the predicted confidence for these regions is low, indicating uncertainty. However, the model may still output geometrically coherent shapes that do not reflect true biological disorder. This illustrates a broader challenge in generative modeling: the system must not only generate plausible structures, but also correctly represent uncertainty and flexibility.
+One limitation discussed in the AlphaFold 3 paper concerns the tendency of generative diffusion models to produce so-called “hallucinations.” In this context, hallucination refers to the model inventing plausible-looking structures in regions that are actually unstructured or intrinsically disordered. Because the diffusion framework is designed to generate coherent atomic coordinates, it may impose order even where no stable structure exists in reality.
 
-Another limitation concerns conformational diversity. Proteins are dynamic systems that exist as ensembles of conformations rather than single fixed structures. Many biological processes depend on structural transitions, such as conformational switching, induced-fit binding, and interactions. Current AlphaFold models primarily predict one dominant conformation or a limited set of sampled structures. They do not yet capture the full thermodynamic landscape of accessible states.
+Another limitation is that proteins are not static objects. They constantly move, switch conformations, and interact dynamically with other molecules. Many biological processes depend on these structural changes. Current AlphaFold models typically predict one dominant structure or a small set of sampled alternatives, but they do not capture the full range of conformations that a protein might adopt.
 
-A related challenge arises when moving from structure prediction to molecular design. A protein or complex generated computationally may appear stable and chemically reasonable in static three-dimensional space. However, its behavior inside a living organism might be different and depends on many additional factors. These aspects are not directly modeled by current structure prediction systems.
-
-Biological systems operate in dynamic, crowded, and context-dependent environments. Accurately modeling how proteins behave under physiological conditions requires integrating structural prediction with thermodynamics, kinetics, and systems-level biology. While AlphaFold has significantly advanced static structure prediction, understanding and modeling dynamic biomolecular behavior remains an open area of research.
+This issue is also related to biological integration and behavior within an organism. A protein that appears stable as a 3D structure may behave differently inside a living cell, where environmental conditions and molecular interactions influence its function in complex ways. Structure prediction is a major step forward, but it is only one piece of a much larger biological picture.
 
 Future progress may involve combining generative structure models with molecular dynamics simulations, experimental constraints, or time-dependent modeling approaches. The ability to predict not only structure, but also structural flexibility and functional behavior, represents the next major challenge in biomolecular AI.
 
-
+On a personal level, it was a fascinating journey to understand the full mechanism behind this Nobel Prize winning machinery. The different modules that incorporate evolutionary, geometric, and structural knowledge, along with the level of detail presented in both papers, are truly impressive. Putting all these puzzle pieces together made me appreciate the results even more. I am really looking forward to seeing how this field continues to develop. See you in the next blog!
 
 ---
 
