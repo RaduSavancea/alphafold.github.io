@@ -104,7 +104,6 @@ Moreover, protein structures help interpret genetic variation and mutations. Man
 
 The ability to computationally predict accurate protein structures at scale fundamentally changes how we approach biology, medicine, and molecular engineering.
 
-
 ---
 
 ## Levinthal’s Paradox
@@ -159,7 +158,7 @@ In 2020 and 2022, AlphaFold dramatically outperformed previous approaches in CAS
 ---
 
 *The next sections will explore the architecture of AlphaFold 2, including MSA feature extraction, the Evoformer, and the structure module, followed by the advances introduced in AlphaFold 3.*
----
+
 
 # AlphaFold 2
 
@@ -231,7 +230,7 @@ Evolution therefore acts as indirect supervision for the 3D structure prediction
 
 <figure style="text-align: center;">
   <img src="{{ '/assets/images/Coevolution.JPG' | relative_url }}" width="550">
-  <figcaption><strong>Figure 5:</strong> Multiple Sequence Alignment capturing evolutionary conservation and co-evolution signals.</figcaption>
+  <figcaption><strong>Figure 5:</strong> Multiple Sequence Alignment capturing evolutionary conservation and co-evolution signals <sup><a href="#ref4">[4]</a></sup>.</figcaption>
 </figure>
 
 ---
@@ -249,7 +248,6 @@ Each slice of this tensor is a learned feature vector encoding the model’s cur
 This representation can be interpreted as a complete graph over residues: each residue corresponds to a node, and every pair of residues is connected by an edge that stores relational features.
 
 Together, the MSA tensor and the Pair tensor provide complementary perspectives. The MSA captures evolutionary constraints across species, whereas the Pair representation models geometric relationships within a single protein. 
-
 
 ---
 
@@ -655,7 +653,7 @@ $$
 
 the model iteratively denoises coordinates until a coherent molecular structure emerges.
 
-Most of the computation happens in the conditioning trunk (the Pairformer). The diffusion module then samples structures consistent with the learned relational representation.
+Most of the computation happens in the conditioning trunk (the Pairformer). The diffusion module then samples structures consistent with the learned relational representation <sup><a href="#ref8">[8]</a></sup>.
 
 ---
 
@@ -840,5 +838,19 @@ https://www.ai4pharm.info/alphafold2
 
 [7] Abramson, J., Adler, J., Dunger, J., et al. (2024). <em>Accurate structure prediction of biomolecular interactions with AlphaFold 3</em>. Nature. Retrieved from  
 https://doi.org/10.1038/s41586-024-07487-w
+
+</div>
+
+<div id="ref8">
+
+[8] AI4Pharm. (2024). <em>AlphaFold3 — Understanding the Diffusion-Based Architecture</em>. Retrieved from  
+https://www.ai4pharm.info/alphafold3
+
+</div>
+
+<div id="ref9">
+
+[9] Elana Pearl. (2024). <em>The Illustrated AlphaFold — Prepare Token-Level Conditioning Tensors</em>. Retrieved from  
+https://elanapearl.github.io/blog/2024/the-illustrated-alphafold/#1-prepare-token-level-conditioning-tensors
 
 </div>
